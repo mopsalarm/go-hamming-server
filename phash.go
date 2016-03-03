@@ -8,28 +8,37 @@ import (
 	"time"
 )
 
-func Recurse(tree *Tree, correct uint, wrong uint, bits *[64]bool, pos int, mutationCount int, results chan uint) {
-	if correct != 0 {
-		Find(tree, correct, bits, pos + 1, mutationCount, results)
-	}
-
-	if mutationCount > 0 && wrong != 0 {
-		Find(tree, wrong, bits, pos + 1, mutationCount - 1, results)
-	}
+type Search struct {
+	tree    *Tree
+	bits    [64]bool
+	results chan uint
 }
 
-func Find(tree *Tree, node uint, bits *[64]bool, pos int, mutationCount int, results chan uint) {
-	if tree.IsLeaf(node) {
-		results <- tree.Value(node)
+func (s *Search) Find(node uint, pos int, mutationCount int) {
+	if pos == 64 {
+		s.results <- s.tree.Value(node)
 		return
 	}
 
-	on := tree.On(node)
-	off := tree.Off(node)
-	if (*bits)[pos] {
-		Recurse(tree, on, off, bits, pos, mutationCount, results)
+	on := s.tree.On(node)
+	off := s.tree.Off(node)
+	if s.bits[pos] {
+		if on != 0 {
+			s.Find(on, pos + 1, mutationCount)
+		}
+
+		if mutationCount > 0 && off != 0 {
+			s.Find(off, pos + 1, mutationCount - 1)
+		}
+
 	} else {
-		Recurse(tree, off, on, bits, pos, mutationCount, results)
+		if off != 0 {
+			s.Find(off, pos + 1, mutationCount)
+		}
+
+		if mutationCount > 0 && on != 0 {
+			s.Find(on, pos + 1, mutationCount - 1)
+		}
 	}
 }
 
@@ -106,13 +115,12 @@ func addHashToTree(tree *Tree, item uint, hash uint64) {
 			if tree.On(node) == 0 {
 				tree.SetOn(node, tree.NewNode())
 			}
-
 			node = tree.On(node)
+
 		} else {
 			if tree.Off(node) == 0 {
 				tree.SetOff(node, tree.NewNode())
 			}
-
 			node = tree.Off(node)
 		}
 	}
@@ -192,12 +200,18 @@ func main() {
 
 	for _, testEntry := range testSet {
 		for i := 0; i < 10; i++ {
-			testEntry.hash[5*i] = !testEntry.hash[5*i]
+			testEntry.hash[5 * i] = !testEntry.hash[5 * i]
 		}
 
 		results := make(chan uint)
 		go func() {
-			Find(tree, tree.Root(), &testEntry.hash, 0, 12, results)
+			search := Search{
+				tree: tree,
+				bits: testEntry.hash,
+				results: results,
+			}
+
+			search.Find(tree.Root(), 0, 12)
 			close(results)
 		}()
 

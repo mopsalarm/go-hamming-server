@@ -1,3 +1,4 @@
 /phash
 /.idea
 *.iml
+/vendor/

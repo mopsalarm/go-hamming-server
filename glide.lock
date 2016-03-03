@@ -1,0 +1,12 @@
+hash: e1b1c01964e15886984b1683574d22ee60b5abca702a921369018616aedcb434
+updated: 2016-03-03T20:04:13.472064376+01:00
+imports:
+- name: github.com/gorilla/context
+  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+- name: github.com/gorilla/handlers
+  version: ee54c7b44cab12289237fb8631314790076e728b
+- name: github.com/gorilla/mux
+  version: c9e326e2bdec29039a3761c07bece13133863e1e
+- name: github.com/steakknife/hamming
+  version: e27aaa806716c431e44a139df6b20fb9cc9c32fe
+devImports: []

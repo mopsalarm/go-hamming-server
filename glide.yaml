@@ -1,0 +1,5 @@
+package: .
+import:
+- package: github.com/gorilla/handlers
+- package: github.com/gorilla/mux
+- package: github.com/steakknife/hamming
